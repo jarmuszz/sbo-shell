@@ -73,7 +73,19 @@ building and installing them <3.
 
 ## Reporting Bugs
 All bugs, suggestions and other issues report to the github issue tracker.  
-Made by Mariusz Jakoniuk aka Jarmusz (jarmuszz AT tuta DOT io)
+Made by Mariusz Jakoniuk aka Jarmusz (jarmuszz AT tuta DOT io).
+
+## TODO
+* [ ] Test all of the functions.
+* [ ] Optimize functions (less recursion, less subshells, globbing when possible).
+* [ ] Minimize calling of user functions from other user functions.
+	+ [ ] Split `_find` and `_goto` into `intern_` and user functions.
+	+ [ ] Rework some things.
+* [ ] Support passing env variables into `_slackbuild`.
+* [ ] Add reloading mechanism.
+* [ ] Add a mechanism preventing running sbo-shell multiple times.
+* [ ] Implement more functions.
+	+ [ ] `_package_installed`
 
 ## License
 This is free and unencumbered software released into the public domain.
