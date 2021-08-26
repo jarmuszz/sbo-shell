@@ -49,6 +49,28 @@ the `sbo-shell.sh` file does **not** spawn a sub-shell, exiting the shell
 |_help | Displays help regarding these functions. |
 |_end | Ends sbo-shell. |
 
+## Examples
+### Checking whether neovim is up-to-date
+	_version_cmp neovim
+
+### Checking whether every neovim dependency is up-to-date
+	 _tree -f neovim | while read pkg; do _version_cmp $pkg; done
+or using `intern_map`
+
+	_tree -f neovim | intern_map _version_cmp
+
+### **Dangerous** - Auto-installing neovim and all of it's dependencies
+	_tree -f neovim | while read pkg; do
+		_goto $pkg
+		_source_info
+		_slackbuild && {
+			installpkg /tmp/$pkg*_SBo*.t?z
+			rm /tmp/$pkg*_SBo*.t?z
+		}
+	done
+Don't do the above, **always** review SlackBuilds and dependencies before
+building and installing them <3.
+
 ## Reporting Bugs
 All bugs, suggestions and other issues report to the github issue tracker.  
 Made by Mariusz Jakoniuk aka Jarmusz (jarmuszz AT tuta DOT io)

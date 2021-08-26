@@ -283,13 +283,13 @@ _tree() {
 
 	if [ ! -z "$FLAT" ]; then
 		shift
-		intern_tree "$$REQUIRES" | sed 's/\s*//' | sort -u | awk '!x[$0]++'
+		intern_tree "$REQUIRES" | sort -u | sed 's/\s*//' | awk '!x[$0]++'
 	else
 		intern_tree "$REQUIRES"
 	fi
 
 	REQUIRES="$REQUIRES_DUP"
-	unset -v REQUIRES_DUP
+	unset -v REQUIRES_DUP FLAT
 }
 
 _version_cmp() (
