@@ -49,19 +49,22 @@ EMAIL"
 # Internal functions
 #	 Those functions are supossed to be called only
 #	 from other functions.
-intern_color() { printf "\e[${ACCENT}m${@}\e[0m"; }
-intern_warn()	 { echo -e "$(intern_color WARNING): $1"; }
-intern_info()	 { echo -e "$(intern_color INFO): $1"; }
-intern_sourced_infop()	{ [ ! -z "$INFO" ]; }
+intern_color() { printf "\e[${ACCENT}m%s\e[0m" "$@"; }
+
+## Expanding variables in printf's $1 may resoult in undefined
+## behaviour but allows for passing escape sequences as arguments.
+intern_warn()	 { printf "%s: ${1}\n" "$(intern_color WARNING)"; }
+intern_info()	 { printf "%s: ${1}\n" "$(intern_color INFO)"; }
+intern_sourced_infop()	{ [ -n "$INFO" ]; }
 
 intern_print_infovar() {
-	[ ! -z "$(eval printf '%s' \"\$$1\")" ] &&
+	[ -n "$(eval printf '%s' \"\$$1\")" ] &&
 		eval "echo \"${1}: $"${1}'"'
 }
 
 intern_map() {
 	# $1 - function name, /dev/stdin list
-	cat /dev/stdin | while read -r var; do $1 $var; done
+	 while read -r var; do $1 $var; done
 }
 
 intern_tree() {
@@ -74,12 +77,12 @@ intern_tree() {
 		printf "%${TREEDEPTH}s%s\n" ' ' "$PRGNAM"
 	fi
 
-	[ -z "$REQUIRES" ] || {
+	[ -n "$REQUIRES" ] && {
 		echo "$REQUIRES" | tr ' ' '\n' | while read -r PKG; do
 			OLDCWD="$PWD"
 
 			TREEDEPTH=$(( TREEDEPTH + 2 ))
-			_source_info $(_find "$PKG")
+			_source_info "$(_find $PKG)"
 			intern_tree "$REQUIRES"
 
 			cd "$OLDCWD"
@@ -106,11 +109,13 @@ _download_sources() {
 	}
 
 	ARCH="$(arch)"
-	if [ "$ARCH" == "x86_64" ] && [ ! -z "$DOWNLOAD_x86_64" ]; then
+	if [ "$ARCH" = "x86_64" ] && [ -n "$DOWNLOAD_x86_64" ]; then
 		intern_info "Downloading for x86_64 architecture."
+		# shellcheck disable=SC2086
 		wget $DOWNLOAD_x86_64
 	else
 		intern_info "Downloading for NON-x86_64 architecture."
+		# shellcheck disable=SC2086
 		wget $DOWNLOAD
 	fi
 }
@@ -119,8 +124,8 @@ _info() {
 	# Prints variables from sourced .info file.
 
 	# Optional: $1 - Package to temporary source and print info
-	[ ! -z "$1" ] && (
-		_source_info $1
+	[ -n "$1" ] && (
+		_source_info "$1"
 		_info
 	) && return
 
@@ -130,7 +135,7 @@ _info() {
 	}
 
 	echo "$INFO_VARS" | while read -r VAR; do
-		intern_print_infovar $VAR
+		intern_print_infovar "$VAR"
 	done
 }
 
@@ -150,18 +155,18 @@ _slackbuild() {
 		return
 	}
 	
-	echo "sudo sh ${PRGNAM}.SlackBuild"
-	sudo sh ${PRGNAM}.SlackBuild
+	echo "sudo sh \"${PRGNAM}\".SlackBuild"
+	sudo sh "${PRGNAM}".SlackBuild
 }
 
 _source_info() {
 	# Sources .info file from current directory
 	
 	# Optional: $1 - Package to source
-	if [ ! -z "$1" ]; then
+	if [ -n "$1" ]; then
 		si_OLDCWD="${PWD}"
 
-		_goto $1
+		_goto "$1"
 		_source_info 
 
 		cd "$si_OLDCWD"
@@ -169,9 +174,9 @@ _source_info() {
 		return
 	fi
 
-	if [ -e *.info ]; then
+	if [ -e ./*.info ]; then
 		_unset_info
-		source *.info &&
+		. ./*.info &&
 			INFO=true
 	else
 		intern_warn "The info file could not be found.\nNothing happened."
@@ -181,6 +186,7 @@ _source_info() {
 _unset_info() {
 	# Unsets all variables from the .info file
 
+	# shellcheck disable=SC2046
 	unset -v $(echo "$INFO_VARS" | tr '\n' ' ')
 	INFO=""
 }
@@ -196,7 +202,7 @@ _changelog() (
 	cd /var/lib/pkgtools/packages
 
 	for file in ${1:-*_SBo}; do
-		grep -n -m 1 "/$(echo $file | sed 's/-[0-9].*//'):" $REPO/ChangeLog.txt
+		grep -n -m 1 "/$(echo $file | sed 's/-[0-9].*//'):" "$REPO/ChangeLog.txt"
 	done | sort -n
 )
 
@@ -204,7 +210,7 @@ _dependencies() {
 	# Prints dependencies of package whose .info file was sourced.
 
 	# Optional: $1 - Package whose dependencies will be printed
-	[ -z "$1" ] || (
+	[ -n "$1" ] && (
 		_source_info "$1"
 		printf '%s\n' "$REQUIRES"
 	) && return
@@ -241,21 +247,21 @@ _goto() {
 		return
 	fi
 	if [ -d "$REPO/$1" ]; then
-		cd $REPO/$1
+		cd "$REPO/$1"
 	else
-		cd $REPO/$(_find $1)
+		cd "$REPO"/$(_find "$1")
 	fi
 
 	[ "$?" -gt "0" ] && {
 		intern_warn "This package doesn't seem to exitst.\nNothing happened."
-		cd $gt_OLDCWD
+		cd "$gt_OLDCWD"
 	}
 	unset -v gt_OLDCWD
 }
 
 _repo() {
 	# Changes cwd to $REPO
-	cd $REPO && echo $REPO
+	cd "$REPO" && echo "$REPO"
 }
 
 _tree() {
@@ -271,8 +277,8 @@ _tree() {
 	}
 
 	# Optional: $1 | $2 - Package whose dependency tree will be printed.
-	[ -z "$1" ] || {
-		_source_info $(_find "$1")
+	[ -n "$1" ] && {
+		_source_info "$1"
 		shift
 	}
 
@@ -281,7 +287,7 @@ _tree() {
 		return
 	}
 
-	if [ ! -z "$FLAT" ]; then
+	if [ -n "$FLAT" ]; then
 		shift
 		intern_tree "$REQUIRES" | sort -u | sed 's/\s*//' | awk '!x[$0]++'
 	else
@@ -318,7 +324,7 @@ _version_cmp() (
 		VERSION_LOCAL="${TR##*-}"
 
 		# Sources $VERSION (Pkg's repository version)
-		source "$REPO/$(_find $PKG)/${PKG}.info"
+		. "$REPO/$(_find $PKG)/${PKG}.info"
 
 		[ "$VERSION_LOCAL" != "$VERSION" ] &&
 			printf "%s: %s %s\n" "$PKG" "$VERSION_LOCAL" "$VERSION"
@@ -425,6 +431,6 @@ EOF
 	_end
 else
 	[ "$SPLASH" = "no" ] ||
-		echo -e "Welcome to sbo-shell, type $(intern_color _help) to see all available commands."
+		printf "Welcome to sbo-shell, type $(intern_color _help) to see all available commands.\n"
 fi
 # End of Checking whether the $REPO is set
