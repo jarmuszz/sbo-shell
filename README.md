@@ -9,7 +9,7 @@ tree](https://git.slackbuilds.org/slackbuilds/) and SBo package
 installations through the shell scripting.
 
 ## Usage
-Point the $REPO variable in `sbo-shell` file to your local SBo repository
+Point the $REPO variable in `sbo-shell.sh` file to your local SBo repository
 and then, in your POSIX shell, source the said file. All of the user
 functions begin with a `_` so that they can be easily listed by tab
 completion. There are also "internal" functions which are supposed to be
@@ -17,7 +17,7 @@ called only from other functions (but nothing is really stopping you from
 using them), they all begin with `intern_`.
 
 To end the `sbo-shell` use the `_end` function. **Important** - sourcing
-`sbo-shell` file does **not** spawn a sub-shell, exiting the shell
+the `sbo-shell.sh` file does **not** spawn a sub-shell, exiting the shell
 (e.g. with `exit` command) will close the whole shell, not only the
 `sbo-shell` session.
 
