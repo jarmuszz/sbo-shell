@@ -28,7 +28,6 @@ the `sbo-shell.sh` file does **not** spawn a sub-shell, exiting the shell
 --- | --- | ---
 |_download_sources| | Downloads sources from the sourced .info file. |
 |_info| [PKG] | Displays all variables set in the .info file. If PKG was passed and it is a valid package name then print it's .info file. |
-|_pull| | Git-pulls repository and rebuilds the package list. |
 |_slackbuild| | Builds slackbuild as a root. |
 |_source_info| [PKG] | Sources the .info file from current directory. If PKG was passed and it is a valid package name then source it's .info file. |
 |_unset_info| | Unsets all variables sourced  from the .info files. |
@@ -47,8 +46,9 @@ the `sbo-shell.sh` file does **not** spawn a sub-shell, exiting the shell
 #### Miscellaneous
 | Function | Description |
 --- | ---
-|_help | Displays help regarding these functions. |
 |_end | Ends sbo-shell. |
+|_help | Displays help regarding these functions. |
+|_pull| | Git-pulls repository and rebuilds the package list. |
 
 ## Examples
 ### Checking whether neovim is up-to-date

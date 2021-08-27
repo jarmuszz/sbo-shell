@@ -139,14 +139,6 @@ _info() {
 	done
 }
 
-_pull() (
-	# Does git pull and recreates package list
-
-	cd "$REPO"
-	git pull
-	find  . -mindepth 2 -maxdepth 2 -name "*" | sed 's/^\.\///' > PKGLIST
-)
-
 _slackbuild() {
 	# Runs slackbuild
 
@@ -335,47 +327,6 @@ _version_cmp() (
 
 
 ## Miscellaneous
-_help() {
-	# Prints help
-
-	cat <<EOF
-sbo-shell 0.1 - Things not really tested
-
-Building and Metainfo
-_download_sources   - Downloads sources from the sourced .info file.
-_info [PKG]         - Displays all variables set in the .info file. If PKG
-                      was passed and it is a valid package name then print
-                      it's .info file.
-_pull               - Git-pulls repository and rebuilds the package list.
-_slackbuild         - Builds slackbuild as a root.
-_source_info [PKG]  - Sources the .info file from current directory. If PKG 
-                      was passed and it is a valid package name then source
-                      it's .info file.
-_unset_info         - Unsets all variables sourced  from the .info files.
-
-Searching and Movement
-_changelog [PKG]    - Prints the newest entry in $REPO/ChangeLog.txt
-                      either for every installed SBo package or for PKG if
-                      it is a valid SBo package name.
-_dependencies [PKG] - Prints dependencies from the sourced .info file. If 
-                      PKG was passed then use it's .info file.
-_find PKG           - Searches for exact-match PKG in the repository.
-_goto PKG           - Changes current directory to the designated package's
-                      repo tree.
-_repo               - Changes current directory to the SBo repo tree.
-_tree [-f] [PKG]    - Prints dependency tree for package which .info file
-                      is currently sourced. If PKG was passed and it is a 
-                      valid package name then use it's .info file. If '-f'
-                      was passed then prints "flatten" dependency tree.
-_version_cmp [PKG]  - Prints every installed SBo out-of-date package. If 
-                      PKG was passed then check only it.
-
-Miscellaneous
-_help               - Displays this message.
-_end                - Ends sbo-shell.
-EOF
-}
-
 _end() {
 	# Ends the sbo-shell session, unsets all that has been set.
 
@@ -413,6 +364,55 @@ _end() {
 		_end \
 
 }
+
+_help() {
+	# Prints help
+
+	cat <<EOF
+sbo-shell 0.1 - Things not really tested
+
+Building and Metainfo
+_download_sources   - Downloads sources from the sourced .info file.
+_info [PKG]         - Displays all variables set in the .info file. If PKG
+                      was passed and it is a valid package name then print
+                      it's .info file.
+_slackbuild         - Builds slackbuild as a root.
+_source_info [PKG]  - Sources the .info file from current directory. If PKG 
+                      was passed and it is a valid package name then source
+                      it's .info file.
+_unset_info         - Unsets all variables sourced  from the .info files.
+
+Searching and Movement
+_changelog [PKG]    - Prints the newest entry in $REPO/ChangeLog.txt
+                      either for every installed SBo package or for PKG if
+                      it is a valid SBo package name.
+_dependencies [PKG] - Prints dependencies from the sourced .info file. If 
+                      PKG was passed then use it's .info file.
+_find PKG           - Searches for exact-match PKG in the repository.
+_goto PKG           - Changes current directory to the designated package's
+                      repo tree.
+_repo               - Changes current directory to the SBo repo tree.
+_tree [-f] [PKG]    - Prints dependency tree for package which .info file
+                      is currently sourced. If PKG was passed and it is a 
+                      valid package name then use it's .info file. If '-f'
+                      was passed then prints "flatten" dependency tree.
+_version_cmp [PKG]  - Prints every installed SBo out-of-date package. If 
+                      PKG was passed then check only it.
+
+Miscellaneous
+_end                - Ends sbo-shell.
+_help               - Displays this message.
+_pull               - Git-pulls repository and rebuilds the package list.
+EOF
+}
+
+_pull() (
+	# Does git pull and recreates package list
+
+	cd "$REPO"
+	git pull
+	find  . -mindepth 2 -maxdepth 2 -name "*" | sed 's/^\.\///' > PKGLIST
+)
 ## End of Miscellaneous
 
 # End of User functions
