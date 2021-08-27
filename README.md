@@ -10,7 +10,8 @@ installations through the shell scripting.
 
 ## Usage
 Point the $REPO variable in `sbo-shell.sh` file to your local SBo repository
-and then, in your POSIX shell, source the said file. All of the user
+and then, in your POSIX shell, source the said file and run a `_pull`
+function to repull the repository and generate PKGLIST. All of the user
 functions begin with a `_` so that they can be easily listed by tab
 completion. There are also "internal" functions which are supposed to be
 called only from other functions (but nothing is really stopping you from
