@@ -357,7 +357,8 @@ Searching and Movement
 _changelog [PKG]    - Prints the newest entry in $REPO/ChangeLog.txt
                       either for every installed SBo package or for PKG if
                       it is a valid SBo package name.
-_dependencies       - Prints dependencies from the sourced .info file.
+_dependencies [PKG] - Prints dependencies from the sourced .info file. If 
+                      PKG was passed then use it's .info file.
 _find PKG           - Searches for exact-match PKG in the repository.
 _goto PKG           - Changes current directory to the designated package's
                       repo tree.
