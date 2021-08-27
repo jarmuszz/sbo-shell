@@ -86,6 +86,7 @@ Made by Mariusz Jakoniuk aka Jarmusz (jarmuszz AT tuta DOT io).
 * [ ] Add a mechanism preventing running sbo-shell multiple times.
 * [ ] Implement more functions.
 	+ [ ] `_package_installed`
+* [ ] Add better examples showing more functions.
 
 ## License
 This is free and unencumbered software released into the public domain.
