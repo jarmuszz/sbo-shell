@@ -257,37 +257,37 @@ _repo() {
 }
 
 _tree() {
-	# Displays full dependency tree of the sourced package. 
+	set -f
+	for arg in "$@"; do
+		case "$arg" in
+			-f) FLAT=1 ;;
+			*)
+				if [ -z "$PKG" ]; then
+					PKG="$arg"
+				else
+					intern_warn "Bad argument list: \"$*\"\nNothing happened"
+					set +f
+					unset -v FLAT PKG arg
+					return 1
+				fi
+				;;
+		esac
+	done
+	set +f
 
-	REQUIRES_DUP="$REQUIRES"
+	( # Using subshell so we won't overwritte the .info variables.
+		[ -n "$PKG" ] && _source_info "$PKG"
+		[ -z "$REQUIRES" ] && return 1 # Ends subshell
 
-	# Optional: -f - Instead of printing a tree just print every
-	#                needed dependency in a parsable way.
-	[ "$1" = "-f" ] && {
-		FLAT=1
-		shift
-	}
+		if [ -z "$FLAT" ]; then
+			intern_tree "$REQUIRES"
+		else 
+			intern_tree "$REQUIRES" | sort -u | sed 's/\s*//' | awk '!x[$0]++'
+		fi
+	) || unset -v FLAT PKG arg 
+	[ -z "$PKG" ] && return 1
 
-	# Optional: $1 | $2 - Package whose dependency tree will be printed.
-	[ -n "$1" ] && {
-		_source_info "$1"
-		shift
-	}
-
-	intern_sourced_infop || {
-		intern_warn "The .info file is not sourced.\nNothing happened." 
-		return
-	}
-
-	if [ -n "$FLAT" ]; then
-		shift
-		intern_tree "$REQUIRES" | sort -u | sed 's/\s*//' | awk '!x[$0]++'
-	else
-		intern_tree "$REQUIRES"
-	fi
-
-	REQUIRES="$REQUIRES_DUP"
-	unset -v REQUIRES_DUP FLAT
+	unset -v FLAT PKG arg
 }
 
 _version_cmp() (
