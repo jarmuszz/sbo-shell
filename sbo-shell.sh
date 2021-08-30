@@ -44,17 +44,18 @@ MD5SUM_x86_64
 REQUIRES
 MAINTAINER
 EMAIL"
+ARCH="$(arch)"
 # End of Constants
 
 # Internal functions
 #	 Those functions are supossed to be called only
 #	 from other functions.
-intern_color() { printf "\e[${ACCENT}m%s\e[0m" "$@"; }
 
 ## Expanding variables in printf's $1 may resoult in undefined
 ## behaviour but allows for passing escape sequences as arguments.
 intern_warn()	 { printf "%s: ${1}\n" "$(intern_color WARNING)"; }
 intern_info()	 { printf "%s: ${1}\n" "$(intern_color INFO)"; }
+intern_color() { printf "\e[${ACCENT}m%s\e[0m" "$@"; }
 intern_sourced_infop()	{ [ -n "$INFO" ]; }
 
 intern_print_infovar() {
@@ -68,7 +69,7 @@ intern_map() {
 }
 
 intern_tree() {
-	# Called by _tree
+	# Called by _tree from a subshell
 	TREEDEPTH=${TREEDEPTH:-0}
 
 	if [ "$TREEDEPTH" -eq "0" ]; then
@@ -86,7 +87,6 @@ intern_tree() {
 			intern_tree "$REQUIRES"
 
 			cd "$OLDCWD"
-			unset -v OLDCWD
 		done
 	}
 }
@@ -105,10 +105,9 @@ _download_sources() {
 
 	intern_sourced_infop || {
 		intern_warn "The .info file is not sourced.\nNothing happened." 
-		return
+		return 1
 	}
 
-	ARCH="$(arch)"
 	if [ "$ARCH" = "x86_64" ] && [ -n "$DOWNLOAD_x86_64" ]; then
 		intern_info "Downloading for x86_64 architecture."
 		# shellcheck disable=SC2086
@@ -121,9 +120,6 @@ _download_sources() {
 }
 
 _info() {
-	# Prints variables from sourced .info file.
-
-	# Optional: $1 - Package to temporary source and print info
 	[ -n "$1" ] && (
 		_source_info "$1"
 		_info
@@ -131,9 +127,9 @@ _info() {
 
 	intern_sourced_infop || {
 		intern_warn "The .info file is not sourced.\nNothing happened." 
-		return
-	}
-
+		return 1
+	} || return 1
+	
 	echo "$INFO_VARS" | while read -r VAR; do
 		intern_print_infovar "$VAR"
 	done
@@ -218,14 +214,38 @@ _dependencies() {
 _find() {
 	# Searches for package in the repository tree.
 	# $1 - Package to search
+	# Optional: -n - Non-exact match
+	set -f
+	for arg in "$@"; do
+		case "$arg" in
+			-f) NONSTRICT=1 ;;
+			*)
+				if [ -z "$PKG" ]; then
+					PKG="$arg"
+				else
+					intern_warn "Bad argument list: \"$*\"\nNothing happened"
+					set +f
+					unset -v NONSTRICT PKG arg
+					return 1
+				fi
+				;;
+		esac
+	done
 
-	if [ -z "$1" ]; then
+	[ -z "$PKG" ] && {
 		intern_warn "Find what?\nNothing happened."
 		return
-	fi
-	cd "$REPO"
-	set -f
-	grep "^.*/${1}$" PKGLIST | sort | uniq
+	}
+
+	grep $(
+		if [ -z "$NONSTRICT" ]; then
+			printf "^.*/%s$" "$PKG"
+		else
+			printf "^.*/.*%s" "$PKG"
+		fi
+	) $REPO/PKGLIST | sort -u
+
+	unset -v NONSTRICT PKG arg
 	set +f
 }
 
@@ -369,7 +389,7 @@ _help() {
 	# Prints help
 
 	cat <<EOF
-sbo-shell 0.1 - Things not really tested
+sbo-shell 0.2 - Things not really tested
 
 Building and Metainfo
 _download_sources   - Downloads sources from the sourced .info file.
