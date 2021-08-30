@@ -51,7 +51,7 @@ ARCH="$(arch)"
 #	 Those functions are supossed to be called only
 #	 from other functions.
 
-## Expanding variables in printf's $1 may resoult in undefined
+## Expanding variables in printf's $1 may result in undefined
 ## behaviour but allows for passing escape sequences as arguments.
 intern_warn()	 { printf "%s: ${1}\n" "$(intern_color WARNING)"; }
 intern_info()	 { printf "%s: ${1}\n" "$(intern_color INFO)"; }
