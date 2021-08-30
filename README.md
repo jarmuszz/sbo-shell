@@ -82,11 +82,12 @@ Made by Mariusz Jakoniuk aka Jarmusz (jarmuszz AT tuta DOT io).
 * [ ] Minimize calling of user functions from other user functions.
 	+ [ ] Split `_find` and `_goto` into `intern_` and user functions.
 	+ [ ] Rework some things.
-* [ ] Support passing env variables into `_slackbuild`.
+* [x] Support passing env variables into `_slackbuild`.
 * [ ] Add reloading mechanism.
 * [ ] Add a mechanism preventing running sbo-shell multiple times.
 * [ ] Implement more functions.
-	+ [ ] `_package_installed`
+	+ [ ] `_is_installed`
+	* [ ] `_out_of_date`
 * [ ] Add better examples showing more functions.
 
 ## License
