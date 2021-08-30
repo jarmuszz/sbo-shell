@@ -37,7 +37,7 @@ the `sbo-shell.sh` file does **not** spawn a sub-shell, exiting the shell
 --- | --- | ---
 |_changelog| [PKG] | Prints the newest entry in $REPO/ChangeLog.txt either for every installed SBo package or for PKG if it is a valid SBo package name. |
 |_dependencies| [PKG] | Prints dependencies from the sourced .info file. If PKG was passed then use it's .info file. |
-|_find| PKG | Searches for exact-match PKG in the repository. |
+|_find| [-n] PKG | Searches for exact-match PKG in the repository. If -n was passed, searches for non-exact match instead. |
 |_goto| PKG | Changes current directory to the designated package's repo tree. |
 |_repo| | Changes current directory to the SBo repo tree. |
 |_tree| [-f] [PKG] | Prints dependency tree for package which .info file is currently sourced. If PKG was passed and it is a valid package name then use it's .info file. If '-f' was passed then prints "flatten" dependency tree. |

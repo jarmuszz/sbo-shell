@@ -218,7 +218,7 @@ _find() {
 	set -f
 	for arg in "$@"; do
 		case "$arg" in
-			-f) NONSTRICT=1 ;;
+			-n) NONSTRICT=1 ;;
 			*)
 				if [ -z "$PKG" ]; then
 					PKG="$arg"
@@ -408,7 +408,8 @@ _changelog [PKG]    - Prints the newest entry in $REPO/ChangeLog.txt
                       it is a valid SBo package name.
 _dependencies [PKG] - Prints dependencies from the sourced .info file. If 
                       PKG was passed then use it's .info file.
-_find PKG           - Searches for exact-match PKG in the repository.
+_find [-n] PKG      - Searches for exact-match PKG in the repository. If -n 
+                      was passed, searches for non-exact match instead.
 _goto PKG           - Changes current directory to the designated package's
                       repo tree.
 _repo               - Changes current directory to the SBo repo tree.
