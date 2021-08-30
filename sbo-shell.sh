@@ -79,11 +79,11 @@ intern_tree() {
 	fi
 
 	[ -n "$REQUIRES" ] && {
-		echo "$REQUIRES" | tr ' ' '\n' | while read -r PKG; do
+		echo "$REQUIRES" | tr ' ' '\n' | while read -r intern_tree_PKG; do
 			OLDCWD="$PWD"
 
 			TREEDEPTH=$(( TREEDEPTH + 2 ))
-			_source_info "$(_find $PKG)"
+			_source_info "$(_find $intern_tree_PKG)"
 			intern_tree "$REQUIRES"
 
 			cd "$OLDCWD"
@@ -220,32 +220,32 @@ _find() {
 		case "$arg" in
 			-n) NONSTRICT=1 ;;
 			*)
-				if [ -z "$PKG" ]; then
-					PKG="$arg"
+				if [ -z "$find_PKG" ]; then
+					find_PKG="$arg"
 				else
 					intern_warn "Bad argument list: \"$*\"\nNothing happened"
 					set +f
-					unset -v NONSTRICT PKG arg
+					unset -v NONSTRICT find_PKG arg
 					return 1
 				fi
 				;;
 		esac
 	done
 
-	[ -z "$PKG" ] && {
+	[ -z "$find_PKG" ] && {
 		intern_warn "Find what?\nNothing happened."
 		return
 	}
 
 	grep $(
 		if [ -z "$NONSTRICT" ]; then
-			printf "^.*/%s$" "$PKG"
+			printf "^.*/%s$" "$find_PKG"
 		else
-			printf "^.*/.*%s" "$PKG"
+			printf "^.*/.*%s" "$find_PKG"
 		fi
 	) $REPO/PKGLIST | sort -u
 
-	unset -v NONSTRICT PKG arg
+	unset -v NONSTRICT find_PKG arg
 	set +f
 }
 
@@ -282,12 +282,12 @@ _tree() {
 		case "$arg" in
 			-f) FLAT=1 ;;
 			*)
-				if [ -z "$PKG" ]; then
-					PKG="$arg"
+				if [ -z "$tree_PKG" ]; then
+					tree_PKG="$arg"
 				else
 					intern_warn "Bad argument list: \"$*\"\nNothing happened"
 					set +f
-					unset -v FLAT PKG arg
+					unset -v FLAT tree_PKG arg
 					return 1
 				fi
 				;;
@@ -296,7 +296,7 @@ _tree() {
 	set +f
 
 	( # Using subshell so we won't overwritte the .info variables.
-		[ -n "$PKG" ] && _source_info "$PKG"
+		[ -n "$tree_PKG" ] && _source_info "$tree_PKG"
 		[ -z "$REQUIRES" ] && return 1 # Ends subshell
 
 		if [ -z "$FLAT" ]; then
@@ -304,10 +304,10 @@ _tree() {
 		else 
 			intern_tree "$REQUIRES" | sort -u | sed 's/\s*//' | awk '!x[$0]++'
 		fi
-	) || unset -v FLAT PKG arg 
-	[ -z "$PKG" ] && return 1
+	) || unset -v FLAT tree_PKG arg 
+	[ -z "$tree_PKG" ] && return 1
 
-	unset -v FLAT PKG arg
+	unset -v FLAT tree_PKG arg
 }
 
 _version_cmp() (
@@ -327,7 +327,7 @@ _version_cmp() (
 		}
 
 		# Pkg name (e.g. xclip)
-		PKG="${pkg_full%%-[0-9]*}"
+		version_cmp_PKG="${pkg_full%%-[0-9]*}"
 
     # Pkg name truncated right (e.g. xclip-0.13)
 		TR="${pkg_full%-*-*}"
@@ -336,10 +336,13 @@ _version_cmp() (
 		VERSION_LOCAL="${TR##*-}"
 
 		# Sources $VERSION (Pkg's repository version)
-		. "$REPO/$(_find $PKG)/${PKG}.info"
+		. "$REPO/$(_find $version_cmp_PKG)/${version_cmp_PKG}.info" 2>/dev/null || {
+			intern_warn "$version_cmp_PKG is not in the repository, skipping."
+			continue
+		}
 
 		[ "$VERSION_LOCAL" != "$VERSION" ] &&
-			printf "%s: %s %s\n" "$PKG" "$VERSION_LOCAL" "$VERSION"
+			printf "%s: %s %s\n" "$version_cmp_PKG" "$VERSION_LOCAL" "$VERSION"
 	done
 	set +f
 )
